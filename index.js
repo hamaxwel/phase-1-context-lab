@@ -9,15 +9,74 @@
  for you to use if you need it!
  */
 
-const allWagesFor = function () {
-    const eligibleDates = this.timeInEvents.map(function (e) {
-        return e.date
-    })
-
-    const payable = eligibleDates.reduce(function (memo, d) {
-        return memo + wagesEarnedOnDate.call(this, d)
-    }.bind(this), 0) // <== Hm, why did we need to add bind() there? We'll discuss soon!
-
-    return payable
+ // Create an employee record
+function createEmployeeRecord([firstName, familyName, title, payPerHour]) {
+    return {
+        firstName,
+        familyName,
+        title,
+        payPerHour,
+        timeInEvents: [],
+        timeOutEvents: []
+    };
 }
+
+// Create multiple employee records
+function createEmployeeRecords(employeeData) {
+    return employeeData.map(data => createEmployeeRecord(data));
+}
+
+// Add a TimeIn event
+function createTimeInEvent(dateTime) {
+    const [date, hour] = dateTime.split(" ");
+    this.timeInEvents.push({
+        type: "TimeIn",
+        hour: parseInt(hour, 10),
+        date
+    });
+    return this;
+}
+
+// Add a TimeOut event
+function createTimeOutEvent(dateTime) {
+    const [date, hour] = dateTime.split(" ");
+    this.timeOutEvents.push({
+        type: "TimeOut",
+        hour: parseInt(hour, 10),
+        date
+    });
+    return this;
+}
+
+// Calculate hours worked on a specific date
+function hoursWorkedOnDate(date) {
+    const timeIn = this.timeInEvents.find(event => event.date === date);
+    const timeOut = this.timeOutEvents.find(event => event.date === date);
+    return (timeOut.hour - timeIn.hour) / 100;
+}
+
+// Calculate wages earned on a specific date
+function wagesEarnedOnDate(date) {
+    return hoursWorkedOnDate.call(this, date) * this.payPerHour;
+}
+
+// Calculate all wages for an employee
+function allWagesFor() {
+    return this.timeInEvents.reduce((total, event) => {
+        return total + wagesEarnedOnDate.call(this, event.date);
+    }, 0);
+}
+
+// Find an employee by their first name
+function findEmployeeByFirstName(srcArray, firstName) {
+    return srcArray.find(record => record.firstName === firstName);
+}
+
+// Calculate payroll for all employees
+function calculatePayroll(employeeRecords) {
+    return employeeRecords.reduce((total, record) => {
+        return total + allWagesFor.call(record);
+    }, 0);
+}
+
 
